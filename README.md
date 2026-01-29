@@ -9,7 +9,7 @@ No extensions will be granted. Plan accordingly.
 
 ══════════════════════════════════
 
-# GigEarn - Workforce Infrastructure Platform for India's Gig Economy
+# GigErn - Workforce Infrastructure Platform for India's Gig Economy
 
 A production-ready workforce platform for India's gig economy, starting with retail store staffing and hyperlocal delivery. This platform focuses on labour reliability, progression, and workforce quality rather than competing with customer marketplaces.
 
@@ -99,7 +99,7 @@ Workers progress upward by meeting transparent, rule-based criteria. Reliability
 ## 📁 Project Structure
 
 ```
-gigearn/
+GigErn/
 ├── frontend/                 # React frontend application
 │   ├── public/              # Static assets
 │   ├── src/                 # Source code
@@ -125,7 +125,7 @@ gigearn/
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd gigearn/frontend
+cd GigErn/frontend
 ```
 
 2. Install dependencies:
