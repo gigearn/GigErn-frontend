@@ -18,10 +18,10 @@ import NotFound from './pages/NotFound/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import PendingVerification from './pages/PendingVerification';
 import ErrorBoundary from './components/ErrorBoundary';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/UserProtectedRoute';
 
 // Role-based Protected Routes
-import { SuperAdminRoute, VerifierRoute } from './components/ProtectedRoutes';
+import { SuperAdminRoute, VerifierRoute } from './components/AdminProtectedRoutes';
 
 // Store Layout and Pages
 import StoreLayout from './layouts/StoreLayout';
