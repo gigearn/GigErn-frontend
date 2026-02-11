@@ -79,7 +79,7 @@ const DocumentUpload = ({
           };
           setUploadedFile(uploadedDoc);
           if (onUpload) {
-            onUpload(file);
+            onUpload(uploadedDoc);
           }
           return 100;
         }

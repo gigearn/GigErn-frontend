@@ -2,17 +2,11 @@ import { useState } from 'react';
 import RegistrationForm from './components/RegistrationForm';
 import OTPVerification from './components/OTPVerification';
 import SuccessMessage from './components/SuccessMessage';
-import { useUserManager } from '../../hooks/useUserManager';
-import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 
 const GigRegistration = () => {
   const [currentStep, setCurrentStep] = useState('form');
   const [selectedUserType] = useState('worker');
   const [registrationData, setRegistrationData] = useState(null);
-  const { registerUser } = useUserManager();
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleFormSubmit = (data) => {
     setRegistrationData(data);
@@ -20,25 +14,7 @@ const GigRegistration = () => {
   };
 
   const handleOTPVerify = (otp) => {
-    // Register user and store in localStorage
-    const userData = registerUser({
-      role: 'gig',
-      name: registrationData.fullName,
-      email: registrationData.email,
-      phone: registrationData.phoneNumber,
-      city: registrationData.city,
-      pincode: registrationData.pincode,
-      vehicleNumber: registrationData.vehicleNumber,
-      verificationStatus: 'pending' // Set to pending to appear in verification queue
-    });
-    
-    // Login and redirect to overview
-    login(userData, 'mock-token-gig');
-    
-    // Update last login
-    setTimeout(() => {
-      navigate('/gig/overview');
-    }, 100);
+    setCurrentStep('success');
   };
 
   const handleOTPResend = () => {

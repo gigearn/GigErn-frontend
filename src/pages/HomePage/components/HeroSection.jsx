@@ -27,7 +27,7 @@ const HeroSection = () => {
                 size="lg"
                 iconName="UserPlus"
                 iconPosition="right"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/registration")}
                 className="w-full sm:w-auto"
               >
                 Get Started Now
