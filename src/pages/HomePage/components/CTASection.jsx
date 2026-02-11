@@ -47,7 +47,7 @@ const CTASection = () => {
                 size="lg"
                 iconName="UserPlus"
                 iconPosition="right"
-                onClick={() => navigate("/registration")}
+                onClick={() => navigate("/register")}
                 className="w-full sm:w-auto"
               >
                 Register as Store
@@ -57,7 +57,7 @@ const CTASection = () => {
                 size="lg"
                 iconName="Briefcase"
                 iconPosition="right"
-                onClick={() => navigate("/registration")}
+                onClick={() => navigate("/register")}
                 className="w-full sm:w-auto"
               >
                 Register as Gig

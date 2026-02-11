@@ -337,7 +337,7 @@ const ContactUs = () => {
             </p>
             <div className="flex gap-4 justify-center">
               <Link 
-                to="/registration" 
+                to="/register" 
                 className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
               >
                 Get Started

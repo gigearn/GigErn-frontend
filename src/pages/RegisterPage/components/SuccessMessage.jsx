@@ -17,8 +17,10 @@ const SuccessMessage = ({ userType, userName }) => {
   const handleContinue = () => {
     if (userType === 'worker') {
       navigate('/worker-dashboard');
+    } else if (userType === 'gig') {
+      navigate('/gig/overview');
     } else if (userType === 'store') {
-      navigate('/store-dashboard');
+      navigate('/store/overview');
     } else {
       navigate('/worker-dashboard'); // Default to worker dashboard for delivery
     }

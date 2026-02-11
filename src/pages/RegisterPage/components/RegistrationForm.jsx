@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Input from '../../../components/elements/Input';
 import Button from '../../../components/elements/Button';
-import DocumentUpload from '../../../components/elements/DocumentsUpload';
 import Icon from '../../../components/elements/Icon';
 
 const RegistrationForm = ({ userType, onSubmit, onBack }) => {
@@ -9,379 +8,296 @@ const RegistrationForm = ({ userType, onSubmit, onBack }) => {
     fullName: '',
     phoneNumber: '',
     email: '',
-    aadhaarNumber: '',
-    panNumber: '',
-    gstNumber: '',
-    shopLicense: '',
-    licenseNumber: '',
+    storeName: '',
+    address: '',
+    pincode: '',
+    city: '',
     vehicleNumber: ''
-  });
-
-  const [documents, setDocuments] = useState({
-    aadhaarDocument: null,
-    panDocument: null,
-    gstDocument: null,
-    shopLicenseDocument: null,
-    drivingLicenseDocument: null,
-    vehicleDocument: null
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e?.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors?.[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const handleDocumentUpload = (documentType, file) => {
-    setDocuments(prev => ({ ...prev, [documentType]: file }));
-    if (errors?.[documentType]) {
-      setErrors(prev => ({ ...prev, [documentType]: '' }));
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Basic validation for all user types
-    if (!formData?.fullName?.trim()) {
+    // Common validations
+    if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     }
 
-    if (!formData?.phoneNumber?.trim()) {
+    if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData?.phoneNumber)) {
+    } else if (!/^[6-9]\d{9}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
       newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
     }
 
-    if (!formData?.email?.trim()) {
+    if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData?.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Worker-specific validation
-    if (userType === 'worker') {
-      if (!formData?.aadhaarNumber?.trim()) {
-        newErrors.aadhaarNumber = 'Aadhaar number is required';
-      } else if (!/^\d{12}$/.test(formData?.aadhaarNumber)) {
-        newErrors.aadhaarNumber = 'Please enter a valid 12-digit Aadhaar number';
-      }
-      
-      if (!formData?.panNumber?.trim()) {
-        newErrors.panNumber = 'PAN number is required';
-      } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData?.panNumber?.toUpperCase())) {
-        newErrors.panNumber = 'Please enter a valid PAN number';
-      }
-      
-      if (!documents?.aadhaarDocument) {
-        newErrors.aadhaarDocument = 'Aadhaar document is required';
-      }
-      
-      if (!documents?.panDocument) {
-        newErrors.panDocument = 'PAN document is required';
-      }
-    }
-
-    // Store-specific validation
+    // Store-specific validations
     if (userType === 'store') {
-      if (!formData?.gstNumber?.trim()) {
-        newErrors.gstNumber = 'GST number is required';
+      if (!formData.storeName.trim()) {
+        newErrors.storeName = 'Store name is required';
       }
-      if (!documents?.gstDocument) {
-        newErrors.gstDocument = 'GST certificate is required';
+      if (!formData.address.trim()) {
+        newErrors.address = 'Address is required';
       }
-      if (!documents?.shopLicenseDocument) {
-        newErrors.shopLicenseDocument = 'Shop & Establishment License is required';
+      if (!formData.pincode.trim()) {
+        newErrors.pincode = 'Pincode is required';
+      } else if (!/^\d{6}$/.test(formData.pincode)) {
+        newErrors.pincode = 'Please enter a valid 6-digit pincode';
       }
     }
 
-    // Delivery-specific validation
-    if (userType === 'delivery') {
-      if (!formData?.aadhaarNumber?.trim()) {
-        newErrors.aadhaarNumber = 'Aadhaar number is required';
-      } else if (!/^\d{12}$/.test(formData?.aadhaarNumber)) {
-        newErrors.aadhaarNumber = 'Please enter a valid 12-digit Aadhaar number';
+    // Gig-specific validations
+    if (userType === 'gig') {
+      if (!formData.city.trim()) {
+        newErrors.city = 'City is required';
       }
-      
-      if (!formData?.panNumber?.trim()) {
-        newErrors.panNumber = 'PAN number is required';
-      } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData?.panNumber?.toUpperCase())) {
-        newErrors.panNumber = 'Please enter a valid PAN number';
-      }
-      
-      if (!formData?.licenseNumber?.trim()) {
-        newErrors.licenseNumber = 'Driving license number is required';
-      }
-      
-      if (!formData?.vehicleNumber?.trim()) {
-        newErrors.vehicleNumber = 'Vehicle registration number is required';
-      }
-      
-      if (!documents?.aadhaarDocument) {
-        newErrors.aadhaarDocument = 'Aadhaar document is required';
-      }
-      
-      if (!documents?.panDocument) {
-        newErrors.panDocument = 'PAN document is required';
-      }
-      
-      if (!documents?.drivingLicenseDocument) {
-        newErrors.drivingLicenseDocument = 'Driving license is required';
-      }
-      
-      if (!documents?.vehicleDocument) {
-        newErrors.vehicleDocument = 'Vehicle registration document is required';
+      if (!formData.pincode.trim()) {
+        newErrors.pincode = 'Pincode is required';
+      } else if (!/^\d{6}$/.test(formData.pincode)) {
+        newErrors.pincode = 'Please enter a valid 6-digit pincode';
       }
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors)?.length === 0;
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e?.preventDefault();
-    if (validateForm()) {
-      setIsSubmitting(true);
-      setTimeout(() => {
-        onSubmit({ ...formData, documents });
-      }, 1500);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Registration error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
-      <div className="flex items-center gap-4 pb-4 border-b border-border">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onBack}
-          className="flex-shrink-0"
-        >
-          <Icon name="ArrowLeft" size={20} />
-        </Button>
-        <div>
-          <h2 className="text-xl md:text-2xl font-semibold text-foreground">
-            {userType === 'worker' ? 'Worker' : userType === 'store' ? 'Store Owner' : 'Delivery Partner'} Registration
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Complete your profile to start finding opportunities
-          </p>
-        </div>
+  const renderStoreFields = () => (
+    <>
+      <div className="space-y-2">
+        <label htmlFor="storeName" className="text-sm font-medium text-foreground">
+          Store Name *
+        </label>
+        <Input
+          id="storeName"
+          name="storeName"
+          type="text"
+          placeholder="Enter your store name"
+          value={formData.storeName}
+          onChange={handleInputChange}
+          error={errors.storeName}
+          disabled={isSubmitting}
+        />
       </div>
 
-      <div className="space-y-6">
-        {/* Basic Information - Common for all user types */}
-        <div className="space-y-4">
-          <h3 className="text-base md:text-lg font-medium text-foreground">Personal Information</h3>
-          
+      <div className="space-y-2">
+        <label htmlFor="address" className="text-sm font-medium text-foreground">
+          Address *
+        </label>
+        <Input
+          id="address"
+          name="address"
+          type="text"
+          placeholder="Enter your store address"
+          value={formData.address}
+          onChange={handleInputChange}
+          error={errors.address}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="pincode" className="text-sm font-medium text-foreground">
+            Pincode *
+          </label>
           <Input
-            label="Full Name"
+            id="pincode"
+            name="pincode"
             type="text"
+            placeholder="6-digit pincode"
+            value={formData.pincode}
+            onChange={handleInputChange}
+            error={errors.pincode}
+            disabled={isSubmitting}
+            maxLength={6}
+          />
+        </div>
+      </div>
+    </>
+  );
+
+  const renderGigFields = () => (
+    <>
+      <div className="space-y-2">
+        <label htmlFor="city" className="text-sm font-medium text-foreground">
+          City *
+        </label>
+        <Input
+          id="city"
+          name="city"
+          type="text"
+          placeholder="Enter your city"
+          value={formData.city}
+          onChange={handleInputChange}
+          error={errors.city}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="pincode" className="text-sm font-medium text-foreground">
+          Pincode *
+        </label>
+        <Input
+          id="pincode"
+          name="pincode"
+          type="text"
+          placeholder="6-digit pincode"
+          value={formData.pincode}
+          onChange={handleInputChange}
+          error={errors.pincode}
+          disabled={isSubmitting}
+          maxLength={6}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="vehicleNumber" className="text-sm font-medium text-foreground">
+          Vehicle Number (Optional)
+        </label>
+        <Input
+          id="vehicleNumber"
+          name="vehicleNumber"
+          type="text"
+          placeholder="e.g., KA-01-AB-1234"
+          value={formData.vehicleNumber}
+          onChange={handleInputChange}
+          disabled={isSubmitting}
+        />
+      </div>
+    </>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        {/* Common Fields */}
+        <div className="space-y-2">
+          <label htmlFor="fullName" className="text-sm font-medium text-foreground">
+            Full Name *
+          </label>
+          <Input
+            id="fullName"
             name="fullName"
+            type="text"
             placeholder="Enter your full name"
-            value={formData?.fullName}
+            value={formData.fullName}
             onChange={handleInputChange}
-            error={errors?.fullName}
-            required
-          />
-
-          <Input
-            label="Phone Number"
-            type="tel"
-            name="phoneNumber"
-            placeholder="Enter 10-digit phone number"
-            value={formData?.phoneNumber}
-            onChange={handleInputChange}
-            error={errors?.phoneNumber}
-            description="We'll send an OTP to verify your number"
-            required
-          />
-
-          <Input
-            label="Email Address"
-            type="email"
-            name="email"
-            placeholder="Enter your email address"
-            value={formData?.email}
-            onChange={handleInputChange}
-            error={errors?.email}
-            description="For important notifications and updates"
-            required
+            error={errors.fullName}
+            disabled={isSubmitting}
           />
         </div>
 
-        {/* Worker-specific Identity Verification */}
-        {(userType === 'worker' || userType === 'delivery') && (
-          <div className="space-y-4">
-            <h3 className="text-base md:text-lg font-medium text-foreground">Identity Verification</h3>
-            
-            <Input
-              label="Aadhaar Number"
-              type="text"
-              name="aadhaarNumber"
-              placeholder="Enter 12-digit Aadhaar number"
-              value={formData?.aadhaarNumber}
-              onChange={handleInputChange}
-              error={errors?.aadhaarNumber}
-              description="Format: XXXX XXXX XXXX"
-              required
-            />
+        <div className="space-y-2">
+          <label htmlFor="phoneNumber" className="text-sm font-medium text-foreground">
+            Phone Number *
+          </label>
+          <Input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            placeholder="Enter 10-digit phone number"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            error={errors.phoneNumber}
+            disabled={isSubmitting}
+            maxLength={10}
+          />
+        </div>
 
-            <DocumentUpload
-              label="Aadhaar Card"
-              description="Upload front and back of your Aadhaar card"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.aadhaarDocument}
-              onUpload={(file) => handleDocumentUpload('aadhaarDocument', file)}
-              documentType="aadhaar"
-            />
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium text-foreground">
+            Email Address *
+          </label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email address"
+            value={formData.email}
+            onChange={handleInputChange}
+            error={errors.email}
+            disabled={isSubmitting}
+          />
+        </div>
 
-            <Input
-              label="PAN Number"
-              type="text"
-              name="panNumber"
-              placeholder="Enter PAN number"
-              value={formData?.panNumber}
-              onChange={handleInputChange}
-              error={errors?.panNumber}
-              description="Format: ABCDE1234F"
-              required
-            />
-
-            <DocumentUpload
-              label="PAN Card"
-              description="Upload your PAN card"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.panDocument}
-              onUpload={(file) => handleDocumentUpload('panDocument', file)}
-              documentType="pan"
-            />
-          </div>
-        )}
-
-        {/* Store-specific Business Verification */}
-        {userType === 'store' && (
-          <div className="space-y-4">
-            <h3 className="text-base md:text-lg font-medium text-foreground">Business Verification</h3>
-            
-            <Input
-              label="GST Number"
-              type="text"
-              name="gstNumber"
-              placeholder="Enter 15-digit GST number"
-              value={formData?.gstNumber}
-              onChange={handleInputChange}
-              error={errors?.gstNumber}
-              description="Format: 22AAAAA0000A1Z5"
-              required
-            />
-
-            <DocumentUpload
-              label="GST Certificate"
-              description="Upload your GST registration certificate"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.gstDocument}
-              onUpload={(file) => handleDocumentUpload('gstDocument', file)}
-              documentType="gst"
-            />
-
-            <DocumentUpload
-              label="Shop & Establishment License"
-              description="Upload your Shop & Establishment License"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.shopLicenseDocument}
-              onUpload={(file) => handleDocumentUpload('shopLicenseDocument', file)}
-              documentType="shop-license"
-            />
-          </div>
-        )}
-
-        {/* Delivery-specific Vehicle Details */}
-        {userType === 'delivery' && (
-          <div className="space-y-4">
-            <h3 className="text-base md:text-lg font-medium text-foreground">Vehicle & License Details</h3>
-            
-            <Input
-              label="Driving License Number"
-              type="text"
-              name="licenseNumber"
-              placeholder="Enter driving license number"
-              value={formData?.licenseNumber}
-              onChange={handleInputChange}
-              error={errors?.licenseNumber}
-              required
-            />
-
-            <DocumentUpload
-              label="Driving License"
-              description="Upload front and back of your driving license"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.drivingLicenseDocument}
-              onUpload={(file) => handleDocumentUpload('drivingLicenseDocument', file)}
-              documentType="driving-license"
-            />
-
-            <Input
-              label="Vehicle Registration Number"
-              type="text"
-              name="vehicleNumber"
-              placeholder="Enter vehicle registration number"
-              value={formData?.vehicleNumber}
-              onChange={handleInputChange}
-              error={errors?.vehicleNumber}
-              description="Format: XX00XX0000"
-              required
-            />
-
-            <DocumentUpload
-              label="Vehicle Registration Certificate"
-              description="Upload your vehicle RC"
-              acceptedFormats=".pdf,.jpg,.jpeg,.png"
-              maxSize={5}
-              required
-              error={errors?.vehicleDocument}
-              onUpload={(file) => handleDocumentUpload('vehicleDocument', file)}
-              documentType="vehicle-rc"
-            />
-          </div>
-        )}
+        {/* Role-specific Fields */}
+        {userType === 'store' ? renderStoreFields() : renderGigFields()}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          fullWidth
-          className="sm:w-auto"
-        >
-          Back
-        </Button>
+      {/* Submit Button */}
+      <div className="space-y-3">
         <Button
           type="submit"
-          variant="default"
-          loading={isSubmitting}
-          fullWidth
-          className="sm:flex-1"
+          disabled={isSubmitting}
+          className="w-full"
+          size="lg"
         >
-          {isSubmitting ? 'Submitting...' : 'Continue to Verification'}
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Creating Account...
+            </>
+          ) : (
+            <>
+              Create {userType === 'store' ? 'Store' : 'Worker'} Account
+            </>
+          )}
         </Button>
+
+        {onBack && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            Back
+          </Button>
+        )}
       </div>
     </form>
   );

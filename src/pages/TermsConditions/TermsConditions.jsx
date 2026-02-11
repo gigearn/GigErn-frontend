@@ -218,7 +218,7 @@ const TermsConditions = () => {
               Join thousands of businesses and workers who trust GigErn for reliable staffing solutions.
             </p>
             <Link 
-              to="/registration" 
+              to="/register" 
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >
               Sign Up Now
