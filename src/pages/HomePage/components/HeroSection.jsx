@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../../../components/elements/Icon";
 import Button from "../../../components/elements/Button";
+import heroImage from "../../../assets/hero-section.png";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const HeroSection = () => {
           </div>
           <div className="relative">
             <img
-              src="/src/assets/hero-section.png"
+              src={heroImage}
               alt="GigErn Staffing Platform"
               className="w-full h-auto object-cover"
             />
