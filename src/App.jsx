@@ -113,7 +113,7 @@ function AppContent() {
           {/* Gig Routes - Protected */}
           <Route path="/gig" element={<Navigate to="/gig/overview" replace />} />
           <Route path="/gig/*" element={
-            <ProtectedRoute requiredRole="gig">
+            <ProtectedRoute requiredRole="worker">
               <GigLayout />
             </ProtectedRoute>
           }>

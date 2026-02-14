@@ -16,7 +16,7 @@ const GigOverview = () => {
   // Get real document data from localStorage
   const documentProgress = getDocumentProgress();
   const missingDocuments = getMissingDocuments();
-  const isVerified = userData?.verificationStatus === 'verified';
+  const isVerified = user?.isVerified;
 
   // Show verification banner if not verified
   if (!isVerified) {

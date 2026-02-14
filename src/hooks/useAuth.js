@@ -26,12 +26,10 @@ export const useAuth = () => {
   }, []);
 
   const login = (userData, token) => {
-    console.log('useAuth: login called with', userData);
     setUser(userData);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token);
-    console.log('useAuth: data stored in localStorage');
   };
 
   const logout = () => {

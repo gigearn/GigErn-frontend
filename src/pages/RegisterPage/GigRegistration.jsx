@@ -2,47 +2,71 @@ import { useState } from 'react';
 import RegistrationForm from './components/RegistrationForm';
 import OTPVerification from './components/OTPVerification';
 import SuccessMessage from './components/SuccessMessage';
-import { useUserManager } from '../../hooks/useUserManager';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/authAPI';
 
 const GigRegistration = () => {
   const [currentStep, setCurrentStep] = useState('form');
   const [selectedUserType] = useState('worker');
   const [registrationData, setRegistrationData] = useState(null);
-  const { registerUser } = useUserManager();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleFormSubmit = (data) => {
-    setRegistrationData(data);
-    setCurrentStep('otp');
+  const handleFormSubmit = async (data) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Call backend registration API
+      const registrationPayload = {
+        ...data,
+        userType: 'worker'
+      };
+      
+      const response = await authAPI.register(registrationPayload);
+      setRegistrationData(data);
+      setCurrentStep('otp');
+    } catch (error) {
+      setError(error.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleOTPVerify = (otp) => {
-    // Register user and store in localStorage
-    const userData = registerUser({
-      role: 'gig',
-      name: registrationData.fullName,
-      email: registrationData.email,
-      phone: registrationData.phoneNumber,
-      city: registrationData.city,
-      pincode: registrationData.pincode,
-      vehicleNumber: registrationData.vehicleNumber,
-      verificationStatus: 'pending' // Set to pending to appear in verification queue
-    });
+  const handleOTPVerify = async (otp) => {
+    setIsLoading(true);
+    setError('');
     
-    // Login and redirect to overview
-    login(userData, 'mock-token-gig');
-    
-    // Update last login
-    setTimeout(() => {
+    try {
+      // Verify OTP and login
+      const response = await authAPI.verifyOTP(registrationData.phoneNumber, otp);
+      
+      // Login with the token received from backend
+      login(response.data.user, response.data.token);
+      
+      // Navigate to gig overview
       navigate('/gig/overview');
-    }, 100);
+    } catch (error) {
+      setError(error.message || 'OTP verification failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleOTPResend = () => {
-    console.log('OTP resent to', registrationData?.phoneNumber);
+  const handleOTPResend = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      await authAPI.sendOTP(registrationData.phoneNumber);
+    } catch (error) {
+      setError(error.message || 'Failed to resend OTP');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBackToForm = () => {
@@ -51,12 +75,19 @@ const GigRegistration = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+      {error && (
+        <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-destructive text-sm">{error}</p>
+        </div>
+      )}
+      
       {currentStep === 'form' && (
         <div className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-elevation-sm">
           <RegistrationForm
             userType={selectedUserType}
             onSubmit={handleFormSubmit}
             onBack={() => window.history.back()}
+            isSubmitting={isLoading}
           />
         </div>
       )}
@@ -69,6 +100,7 @@ const GigRegistration = () => {
               onVerify={handleOTPVerify}
               onResend={handleOTPResend}
               onBack={handleBackToForm}
+              isLoading={isLoading}
             />
           </div>
         </div>

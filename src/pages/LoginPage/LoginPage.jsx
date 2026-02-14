@@ -7,12 +7,15 @@ import CountryCodeSelector from "./components/CountryCodeSelector";
 import OTPInput from "./components/OTPInput";
 import loginImage from "../../assets/login-page.png";
 import { useAuth } from "../../hooks/useAuth";
+import { authAPI } from "../../services/authAPI";
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [step, setStep] = useState("phone");
-  const [countryCode, setCountryCode] = useState("+91");
+    const [countryCode, setCountryCode] = useState("+91");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +23,14 @@ const Login = () => {
   const [resendTimer, setResendTimer] = useState(0);
 
   const mockCredentials = {
-    store: { phone: "1234567890", otp: "123456", role: "store" },
-    gig: { phone: "9876543210", otp: "123456", role: "gig" },
-    worker: { phone: "1111111111", otp: "123456", role: "worker" }
+    store: [
+      { phone: "9876543210", email: "ravi.store@gigern.com", password: "password123", name: "Ravi Kumar Store" },
+      { phone: "9876543212", email: "priya.store@gigern.com", password: "password123", name: "Priya Sharma Store" }
+    ],
+    gig: [
+      { phone: "1234567890", email: "amit.worker@gigern.com", password: "password123", name: "Amit Singh Worker" },
+      { phone: "9876543213", email: "rahul.worker@gigern.com", password: "password123", name: "Rahul Verma Worker" }
+    ]
   };
 
   useEffect(() => {
@@ -34,97 +42,85 @@ const Login = () => {
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
-
   const validatePhoneNumber = (number) => {
     const cleaned = number?.replace(/\D/g, "");
     return cleaned?.length >= 10 && cleaned?.length <= 15;
   };
 
-  const handlePhoneSubmit = (e) => {
+  const handleEmailLogin = async (e) => {
     e?.preventDefault();
     setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await authAPI.login(email, password);
+      
+      // Login with the token and user data from backend
+      login(response.data.user, response.data.token);
+      
+      // Navigate based on user type
+      if (response.data.user.userType === 'store') {
+        navigate('/store/overview');
+      } else {
+        navigate('/gig/overview');
+      }
+    } catch (error) {
+      setError(error.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePhoneSubmit = async (e) => {
+    e?.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     if (!validatePhoneNumber(phoneNumber)) {
       setError("Please enter a valid phone number (10-15 digits)");
-      return;
-    }
-
-    const cleanedPhone = phoneNumber?.replace(/\D/g, "");
-    const isValidCredential = Object.values(mockCredentials)?.some(
-      (cred) => cred?.phone === cleanedPhone,
-    );
-
-    if (!isValidCredential) {
-      setError(
-        `Invalid phone number. Use ${mockCredentials?.store?.phone} (Store) or ${mockCredentials?.worker?.phone} (Worker)`,
-      );
-      return;
-    }
-
-    setIsLoading(true);
-    setTimeout(() => {
       setIsLoading(false);
+      return;
+    }
+
+    try {
+      await authAPI.sendOTP(phoneNumber);
       setStep("otp");
       setResendTimer(60);
-    }, 1500);
+    } catch (error) {
+      setError(error.message || 'Failed to send OTP');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleOTPSubmit = (e) => {
+  const handleOTPSubmit = async (e) => {
     e?.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (otp?.length !== 6) {
       setError("Please enter the complete 6-digit OTP");
-      return;
-    }
-
-    const cleanedPhone = phoneNumber?.replace(/\D/g, "");
-    
-    const matchedCredential = Object.values(mockCredentials)?.find(
-      (cred) => cred?.phone === cleanedPhone,
-    );
-
-    if (!matchedCredential || matchedCredential?.otp !== otp) {
-      setError("Invalid OTP. Please check and try again");
-      return;
-    }
-
-    setIsLoading(true);
-    setTimeout(() => {
       setIsLoading(false);
-      if (matchedCredential?.role === "store") {
-        // Store user data in localStorage for ProtectedRoute
-        const userData = {
-          role: 'store',
-          name: 'Store User',
-          storeName: 'FreshMart Grocery',
-          email: 'store@gigearn.com',
-          phone: countryCode + phoneNumber,
-          verificationStatus: 'verified'
-        };
-        login(userData, 'mock-token-store');
-        navigate("/store/overview");
-      } else if (matchedCredential?.role === "gig") {
-        const userData = {
-          role: 'gig',
-          name: 'Gig Worker',
-          email: 'gig@gigearn.com',
-          phone: countryCode + phoneNumber,
-          verificationStatus: 'verified'
-        };
-        login(userData, 'mock-token-gig');
-        navigate("/gig/overview");
+      return;
+    }
+
+    try {
+      const response = await authAPI.verifyOTP(phoneNumber, otp);
+      
+      // Login with the token and user data from backend
+      login(response.data.user, response.data.token);
+      
+      // Navigate based on user type
+      if (response.data.user.userType === 'store') {
+        navigate('/store/overview');
       } else {
-        const userData = {
-          role: 'worker',
-          name: 'Worker User',
-          email: 'worker@gigearn.com',
-          phone: countryCode + phoneNumber
-        };
-        login(userData, 'mock-token-worker');
-        navigate("/worker-dashboard");
+        navigate('/gig/overview');
       }
-    }, 1500);
+    } catch (error) {
+      setError(error.message || 'OTP verification failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResendOTP = () => {
@@ -163,11 +159,13 @@ const Login = () => {
               <div className="w-full max-w-md">
                 <div className="mb-6 lg:mb-8">
                   <h1 className="text-3xl lg:text-4xl font-semibold text-foreground mb-2">
-                    {step === "phone" ? "Welcome Back" : "Verify OTP"}
+                    {step === "phone" ? "Welcome Back" : step === "credentials" ? "Email Login" : "Verify OTP"}
                   </h1>
                   <p className="text-muted-foreground">
                     {step === "phone"
-                      ? "Log in to manage gigs, payments, and clients."
+                      ? "Enter your phone number to sign in to your account."
+                      : step === "credentials"
+                      ? "Sign in with your email and password."
                       : `We sent a 6-digit code to ${countryCode} ${formatPhoneDisplay(phoneNumber)}`}
                   </p>
                 </div>
@@ -213,7 +211,81 @@ const Login = () => {
                     </div>
                   </div>
 
-                  {step === "phone" ? (
+                  {step === "credentials" ? (
+                    <form onSubmit={handleEmailLogin} className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-3">
+                          Email Address <span className="text-error">*</span>
+                        </label>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError("");
+                          }}
+                          disabled={isLoading}
+                          error={error && !email ? "Email is required" : ""}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-3">
+                          Password <span className="text-error">*</span>
+                        </label>
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            setError("");
+                          }}
+                          disabled={isLoading}
+                          error={error && !password ? "Password is required" : ""}
+                        />
+                      </div>
+
+                      {error && (
+                        <p className="mt-2 text-sm text-error flex items-center gap-2">
+                          <Icon name="AlertCircle" size={16} />
+                          {error}
+                        </p>
+                      )}
+
+                      <Button
+                        type="submit"
+                        size="lg"
+                        fullWidth
+                        loading={isLoading}
+                        disabled={!email || !password || isLoading}
+                      >
+                        Sign In
+                      </Button>
+
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => setStep("phone")}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Use Phone Number Instead
+                        </button>
+                      </div>
+
+                      <p className="text-sm text-center text-muted-foreground">
+                        Don't have an account?{" "}
+                        <button
+                          type="button"
+                          onClick={() => navigate("/register")}
+                          className="text-primary font-medium hover:underline"
+                        >
+                          Register now
+                        </button>
+                      </p>
+                    </form>
+                  ) : step === "phone" ? (
                     <form onSubmit={handlePhoneSubmit} className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-3">
@@ -254,11 +326,21 @@ const Login = () => {
                         loading={isLoading}
                         disabled={!phoneNumber || isLoading}
                       >
-                        Continue
+                        Send OTP
                       </Button>
 
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => setStep("credentials")}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Use Email Instead
+                        </button>
+                      </div>
+
                       <p className="text-sm text-center text-muted-foreground">
-                        Don’t have an account?{" "}
+                        Don't have an account?{" "}
                         <button
                           type="button"
                           onClick={() => navigate("/register")}
@@ -356,14 +438,16 @@ const Login = () => {
         <h4 className="text-sm font-semibold text-foreground mb-2">Demo Credentials</h4>
         <div className="space-y-2 text-xs">
           <div className="bg-muted/50 p-2 rounded">
-            <p className="font-medium">Store Owner</p>
-            <p className="text-muted-foreground">Phone: 1234567890</p>
-            <p className="text-muted-foreground">OTP: 123456</p>
+            <p className="font-medium">🏪 Store Owners</p>
+            <p className="text-muted-foreground">Ravi: 9876543210</p>
+            <p className="text-muted-foreground">Priya: 9876543212</p>
+            <p className="text-muted-foreground">OTP: 123456 (dev)</p>
           </div>
           <div className="bg-muted/50 p-2 rounded">
-            <p className="font-medium">Gig Worker</p>
-            <p className="text-muted-foreground">Phone: 9876543210</p>
-            <p className="text-muted-foreground">OTP: 123456</p>
+            <p className="font-medium">👷 Gig Workers</p>
+            <p className="text-muted-foreground">Amit: 1234567890</p>
+            <p className="text-muted-foreground">Rahul: 9876543213</p>
+            <p className="text-muted-foreground">OTP: 123456 (dev)</p>
           </div>
         </div>
       </div>

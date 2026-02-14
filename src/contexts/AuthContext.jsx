@@ -75,19 +75,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const hasAnyRole = (roles) => {
-    return roles.includes(user?.role);
+    return roles.includes(user?.userType || user?.role);
   };
 
   const isSuperAdmin = () => {
-    return user?.role === 'super_admin';
+    return user?.userType === 'admin';
   };
 
   const isVerifier = () => {
-    return user?.role === 'verifier';
+    return user?.userType === 'verifier';
   };
 
   const isInternalUser = () => {
-    return ['super_admin', 'verifier'].includes(user?.role);
+    return ['admin', 'verifier'].includes(user?.userType);
   };
 
   const value = {

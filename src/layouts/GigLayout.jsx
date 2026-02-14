@@ -104,15 +104,15 @@ const GigLayout = () => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Worker Status</span>
               <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                user?.verificationStatus === 'verified' 
+                user?.isVerified 
                   ? 'bg-success/10 text-success' 
                   : 'bg-warning/10 text-warning'
               }`}>
-                {user?.verificationStatus === 'verified' ? 'Verified' : 'Pending'}
+                {user?.isVerified ? 'Verified' : 'Pending'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {user?.name || 'Gig Worker'}
+              {user?.fullName || user?.name || 'Gig Worker'}
             </p>
           </div>
 
@@ -160,9 +160,9 @@ const GigLayout = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {user?.name || 'Gig Worker'}
+                  {user?.fullName || 'Gig Worker'}
                 </p>
-                {user?.verificationStatus === 'verified' && (
+                {user?.isVerified === true && (
                   <img 
                     src={verifiedBadge} 
                     alt="Verified" 

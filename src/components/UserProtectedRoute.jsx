@@ -40,8 +40,9 @@ const ProtectedRoute = ({ children, requireDocuments = false, requiredRole = nul
   }
 
   // If role is required and user doesn't have the correct role, redirect to unauthorized
-  if (requiredRole && user.role !== requiredRole) {
-    console.log('ProtectedRoute: wrong role. User role:', user.role, 'Required:', requiredRole);
+  const userRole = user.role || user.userType; // Handle both role and userType from backend
+  if (requiredRole && userRole !== requiredRole) {
+    console.log('ProtectedRoute: wrong role. User role:', userRole, 'Required:', requiredRole);
     return <Navigate to="/unauthorized" replace />;
   }
 
@@ -53,7 +54,7 @@ const ProtectedRoute = ({ children, requireDocuments = false, requiredRole = nul
     if (!hasAllDocuments) {
       console.log('ProtectedRoute: documents required but not uploaded. Progress:', documentProgress);
       // Redirect to appropriate documents page based on user role
-      const documentsRoute = user.role === 'gig' ? '/gig/documents' : '/store/documents';
+      const documentsRoute = userRole === 'gig' ? '/gig/documents' : '/store/documents';
       return <Navigate to={documentsRoute} replace />;
     }
   }

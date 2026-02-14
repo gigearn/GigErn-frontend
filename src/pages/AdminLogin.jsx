@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/elements/Icon';
 import { useAuth } from '../contexts/AuthContext';
+import API_BASE_URL from '../config/api.js';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -21,37 +22,39 @@ const AdminLogin = () => {
       return;
     }
 
-    if (phone === '9241272626') {
+    if (phone === '9241272626' || phone === '9241272628') {
       setShowOTP(true);
     } else {
       setError('Admin access not authorized for this number');
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Mock super admin authentication
-      const superAdminUser = {
-        id: 'super_admin_001',
-        name: 'Super Admin',
-        email: 'admin@gigearn.com',
-        role: 'super_admin',
-        phone: phone,
-      };
+      // Call backend API for admin login
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone, otp }),
+      });
 
-      const authData = {
-        token: 'mock_super_admin_token_' + Date.now(),
-        expiresIn: '24h',
-      };
+      const data = await response.json();
 
-      login(superAdminUser, authData);
+      if (!response.ok) {
+        throw new Error(data.message || 'Admin login failed');
+      }
+
+      // Login with admin user data from backend
+      login(data.data.user, data.data.token);
       navigate('/admin/overview');
     } catch (error) {
-      setError('Login failed. Please try again.');
+      setError(error.message || 'Login failed. Please try again.');
     }
     
     setIsLoading(false);
@@ -170,8 +173,8 @@ const AdminLogin = () => {
           {/* Demo Credentials */}
           <div className="pt-4 border-t border-border">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Demo Credentials:</strong><br />
-              Phone: 9241272626<br />
+              <strong>Admin Demo Credentials:</strong><br />
+              Admin: 9241272626<br />
               OTP: 123456
             </p>
           </div>

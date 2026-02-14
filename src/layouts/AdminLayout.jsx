@@ -108,8 +108,8 @@ const AdminLayout = () => {
               <Icon name="Shield" size={16} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{user?.name || 'Super Admin'}</p>
-              <p className="text-xs text-muted-foreground truncate">Super Administrator</p>
+              <p className="text-sm font-medium text-foreground truncate">{user?.name || 'Admin'}</p>
+              <p className="text-xs text-muted-foreground truncate">Administrator</p>
             </div>
           </div>
           <button
