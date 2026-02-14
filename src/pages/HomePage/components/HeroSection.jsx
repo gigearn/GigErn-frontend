@@ -73,6 +73,7 @@ const HeroSection = () => {
               src={heroImage}
               alt="GigErn Staffing Platform"
               className="w-full h-auto object-cover"
+              loading="eager"
             />
           </div>
         </div>
